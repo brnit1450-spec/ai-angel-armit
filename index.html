@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>World Clock</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07111f; --card:#10243b; --text:#edf7ff; --muted:#9bb0c7; --accent:#48e5ff; --border:#24405a; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; font-family:system-ui,-apple-system,Segoe UI,sans-serif; color:var(--text); background:radial-gradient(circle at top right,#174568,transparent 42%),var(--bg); }
+    main { width:min(1000px,100%); }
+    header { text-align:center; margin-bottom:28px; }
+    h1 { margin:0 0 8px; font-size:clamp(2.3rem,6vw,4.5rem); letter-spacing:-.06em; }
+    header p { margin:0; color:var(--muted); }
+    .clocks { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .clock { padding:24px; border:1px solid var(--border); border-radius:20px; background:linear-gradient(145deg,rgba(16,36,59,.96),rgba(10,24,40,.96)); box-shadow:0 18px 50px #0004; }
+    .city { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:16px; }
+    .city h2 { margin:0; font-size:1.25rem; }
+    .zone { color:var(--accent); font-size:.75rem; }
+    .time { font-variant-numeric:tabular-nums; font-size:clamp(2rem,5vw,3rem); font-weight:800; letter-spacing:-.05em; white-space:nowrap; }
+    .date { margin-top:8px; color:var(--muted); }
+    footer { text-align:center; color:var(--muted); margin-top:24px; font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>World Clock</h1>
+      <p>Current time around the world</p>
+    </header>
+    <section class="clocks" id="clocks" aria-live="polite"></section>
+    <footer>Times update automatically every second</footer>
+  </main>
+  <script>
+    const cities = [
+      { name: 'Ahmedabad', zone: 'Asia/Kolkata', label: 'IST' },
+      { name: 'London', zone: 'Europe/London', label: 'GMT / BST' },
+      { name: 'New York', zone: 'America/New_York', label: 'ET' },
+      { name: 'Tokyo', zone: 'Asia/Tokyo', label: 'JST' },
+      { name: 'Dubai', zone: 'Asia/Dubai', label: 'GST' },
+      { name: 'Sydney', zone: 'Australia/Sydney', label: 'AEDT / AEST' }
+    ];
+
+    const clocks = document.querySelector('#clocks');
+    const cards = cities.map(city => {
+      const card = document.createElement('article');
+      card.className = 'clock';
+      card.innerHTML = `
+        <div class="city"><h2>${city.name}</h2><span class="zone">${city.label}</span></div>
+        <div class="time"></div>
+        <div class="date"></div>
+      `;
+      clocks.appendChild(card);
+      return { ...city, time: card.querySelector('.time'), date: card.querySelector('.date') };
+    });
+
+    const timeFormat = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    const dateFormat = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+
+    function updateClocks() {
+      const now = new Date();
+      cards.forEach(city => {
+        city.time.textContent = new Intl.DateTimeFormat('en-US', { ...timeFormat, timeZone: city.zone }).format(now);
+        city.date.textContent = new Intl.DateTimeFormat('en-US', { ...dateFormat, timeZone: city.zone }).format(now);
+      });
+    }
+
+    updateClocks();
+    setInterval(updateClocks, 1000);
+  </script>
+</body>
+</html>
